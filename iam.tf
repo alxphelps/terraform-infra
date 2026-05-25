@@ -38,8 +38,8 @@ resource "aws_iam_role" "github_deploy" {
 }
 
 # Scoped enough for GitHub Actions to run SSM Run Command on tagged instances; tighten for production.
-resource "aws_iam_role_policy" "github_deploy_ssm" {
-  name = "${var.project_name}-github-deploy-ssm"
+resource "aws_iam_role_policy" "github_deploy" {
+  name = "${var.project_name}-github-deploy-policy"
   role = aws_iam_role.github_deploy.id
 
   policy = jsonencode({

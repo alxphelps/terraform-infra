@@ -102,7 +102,14 @@ Workflows in `.github/workflows/`:
 
 For app deploys (SSM, etc.), use output **`github_deploy_role_arn`** with `aws-actions/configure-aws-credentials`, `permissions: id-token: write`, and a trust policy subject matching your `github_org` / `github_repo` (and optional `github_branches`).
 
-Configure repository secrets (or OIDC) so CI can read/write the S3 backend and call AWS APIs.
+Configure these **repository secrets** (Settings → Secrets and variables → Actions) so CI can access the S3 backend and AWS APIs:
+
+| Secret | Description |
+|--------|-------------|
+| `AWS_ACCESS_KEY_ID` | IAM access key for Terraform in CI |
+| `AWS_SECRET_ACCESS_KEY` | Matching secret key |
+
+Workflows set `aws-region` to `us-east-1` (same as the state backend and default `aws_region`).
 
 ## Packer
 
