@@ -1,0 +1,7 @@
+aws_region   = "us-east-1"
+project_name = "portfolio"
+domain_name = "alxphelps.com"
+alb_dns_name = "portfolio.alxphelps.com"
+github_org  = "alxphelps"
+github_repo = "portfolio"
+instance_type    = "t3.small"
