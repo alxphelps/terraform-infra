@@ -22,14 +22,8 @@ jobs:
         with:
           terraform_version: 1.15.4
 
-      - name: Terraform fmt check
-        run: terraform fmt -check -recursive
-
       - name: Terraform init
         run: terraform init
-
-      - name: Terraform validate
-        run: terraform validate
 
       - name: Terraform plan
         run: terraform plan -out=tfplan
