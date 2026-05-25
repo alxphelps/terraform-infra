@@ -63,6 +63,30 @@ resource "aws_iam_role_policy" "github_deploy_ssm" {
         Effect   = "Allow"
         Action   = ["ec2:DescribeInstances", "ec2:DescribeInstanceStatus", "ec2:DescribeTags"]
         Resource = "*"
+      },
+      {
+        "Sid": "ECRLogin",
+        "Effect": "Allow",
+        "Action": [
+          "ecr:GetAuthorizationToken"
+        ],
+        "Resource": "*"
+      },
+      {
+        "Sid": "ECRPull",
+        "Effect": "Allow",
+        "Action": [
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:BatchGetImage",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:InitiateLayerUpload",
+          "ecr:UploadLayerPart",
+          "ecr:CompleteLayerUpload",
+          "ecr:PutImage"
+        ],
+        "Resource": [
+          "arn:aws:ecr:us-east-1:342989859526:repository/alxphelps/portfolio"
+          ]
       }
     ]
   })
@@ -94,8 +118,8 @@ resource "aws_iam_role_policy_attachment" "app_instance_ssm" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
-resource "aws_iam_role_policy" "app_instance_s3_read" {
-  name = "${var.project_name}-app-instance-s3-read"
+resource "aws_iam_role_policy" "app_instance" {
+  name = "${var.project_name}-app-instance-policy"
   role = aws_iam_role.app_instance.id
 
   policy = jsonencode({
@@ -109,6 +133,45 @@ resource "aws_iam_role_policy" "app_instance_s3_read" {
           "s3:List*"
         ]
         Resource = "*"
+      },
+      {
+        "Sid": "ECRLogin",
+        "Effect": "Allow",
+        "Action": [
+          "ecr:GetAuthorizationToken"
+        ],
+        "Resource": "*"
+      },
+      {
+        "Sid": "ECRPull",
+        "Effect": "Allow",
+        "Action": [
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:BatchGetImage",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:InitiateLayerUpload",
+          "ecr:UploadLayerPart",
+          "ecr:CompleteLayerUpload",
+          "ecr:PutImage"
+        ],
+        "Resource": [
+          "arn:aws:ecr:us-east-1:342989859526:repository/alxphelps/portfolio"
+          ]
+      },
+      {
+        Sid    = "ListTfstateBucket"
+        Effect = "Allow"
+        Action = ["s3:ListBucket"]
+        Resource = "arn:aws:s3:::342989859526.tfstate"
+      },
+      {
+        Sid    = "ReadTfstateObjects"
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:GetObjectVersion"
+        ]
+        Resource = "arn:aws:s3:::342989859526.tfstate/*"
       }
     ]
   })
