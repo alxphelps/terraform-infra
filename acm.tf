@@ -1,3 +1,4 @@
+# TLS certificate for the site hostname (DNS validation)
 resource "aws_acm_certificate" "aws_acm_certificate" {
   domain_name = var.alb_dns_name
 
@@ -16,6 +17,7 @@ resource "aws_acm_certificate" "aws_acm_certificate" {
   }
 }
 
+# Route 53 records required for ACM DNS validation
 resource "aws_route53_record" "cert_validation" {
   for_each = {
     for dvo in aws_acm_certificate.aws_acm_certificate.domain_validation_options : dvo.domain_name => {
@@ -33,6 +35,7 @@ resource "aws_route53_record" "cert_validation" {
   zone_id         = data.aws_route53_zone.alxphelps.zone_id
 }
 
+# Wait until ACM marks the certificate as issued
 resource "aws_acm_certificate_validation" "aws_acm_certificate_validation" {
   certificate_arn         = aws_acm_certificate.aws_acm_certificate.arn
   validation_record_fqdns = [for r in aws_route53_record.cert_validation : r.fqdn]

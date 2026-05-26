@@ -1,5 +1,5 @@
+# HTTPS target group for app instances behind the ALB
 resource "aws_lb_target_group" "portfolio" {
-  # Fixed generic name (<= 32 chars). Change if it collides in your account/region.
   name     = "app-pub-tg"
   port     = 443
   protocol = "HTTPS"
@@ -23,6 +23,7 @@ resource "aws_lb_target_group" "portfolio" {
   }
 }
 
+# Public application load balancer
 resource "aws_lb" "portfolio" {
   name               = "${var.project_name}-alb"
   internal           = false
@@ -37,6 +38,7 @@ resource "aws_lb" "portfolio" {
   }
 }
 
+# HTTP listener: redirect all traffic to HTTPS
 resource "aws_lb_listener" "http_redirect" {
   load_balancer_arn = aws_lb.portfolio.arn
   port              = 80
@@ -52,6 +54,7 @@ resource "aws_lb_listener" "http_redirect" {
   }
 }
 
+# HTTPS listener: terminate TLS and forward to the target group
 resource "aws_lb_listener" "https" {
   load_balancer_arn = aws_lb.portfolio.arn
   port              = 443

@@ -1,3 +1,4 @@
+# ALB security group: HTTP/HTTPS from the internet
 resource "aws_security_group" "alb" {
   name        = "${var.project_name}-alb-sg"
   description = "Allow HTTP/HTTPS from internet for ALB"
@@ -31,6 +32,7 @@ resource "aws_security_group" "alb" {
   }
 }
 
+# App instance security group: HTTPS from the ALB only
 resource "aws_security_group" "portfolio" {
   name        = "${var.project_name}-portfolio-sg"
   description = "App instances: HTTPS only from ALB"

@@ -1,13 +1,16 @@
+# GitHub Actions OIDC TLS thumbprint for the provider
 data "tls_certificate" "github" {
   url = "https://token.actions.githubusercontent.com"
 }
 
+# OIDC identity provider for GitHub Actions
 resource "aws_iam_openid_connect_provider" "github" {
   url             = "https://token.actions.githubusercontent.com"
   client_id_list  = ["sts.amazonaws.com"]
   thumbprint_list = distinct(concat([data.tls_certificate.github.certificates[0].sha1_fingerprint], []))
 }
 
+# IAM role assumed by GitHub Actions via OIDC
 resource "aws_iam_role" "github_deploy" {
   name = "${var.project_name}-github-deploy"
 
@@ -37,7 +40,7 @@ resource "aws_iam_role" "github_deploy" {
   }
 }
 
-# Scoped enough for GitHub Actions to run SSM Run Command on tagged instances; tighten for production.
+# Inline policy: SSM deploy + ECR push/pull for GitHub Actions
 resource "aws_iam_role_policy" "github_deploy" {
   name = "${var.project_name}-github-deploy-policy"
   role = aws_iam_role.github_deploy.id
@@ -92,6 +95,7 @@ resource "aws_iam_role_policy" "github_deploy" {
   })
 }
 
+# EC2 role for app instances in the ASG
 resource "aws_iam_role" "app_instance" {
   name = "${var.project_name}-app-instance"
 
@@ -113,11 +117,13 @@ resource "aws_iam_role" "app_instance" {
   }
 }
 
+# AWS managed policy: SSM Session Manager on app instances
 resource "aws_iam_role_policy_attachment" "app_instance_ssm" {
   role       = aws_iam_role.app_instance.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
+# Inline policy: S3 read, ECR, and tfstate bucket access for app instances
 resource "aws_iam_role_policy" "app_instance" {
   name = "${var.project_name}-app-instance-policy"
   role = aws_iam_role.app_instance.id
@@ -177,6 +183,7 @@ resource "aws_iam_role_policy" "app_instance" {
   })
 }
 
+# Instance profile attached to ASG launch template
 resource "aws_iam_instance_profile" "portfolio" {
   name = "${var.project_name}-app-profile"
   role = aws_iam_role.app_instance.name
@@ -186,6 +193,7 @@ resource "aws_iam_instance_profile" "portfolio" {
   }
 }
 
+# EC2 role for Packer AMI builds
 resource "aws_iam_role" "packer" {
   name = "packer"
 
@@ -207,6 +215,7 @@ resource "aws_iam_role" "packer" {
   }
 }
 
+# Inline policy: read Terraform state bucket during Packer builds
 resource "aws_iam_role_policy" "packer" {
   name = "packer"
   role = aws_iam_role.packer.id
@@ -233,6 +242,7 @@ resource "aws_iam_role_policy" "packer" {
   })
 }
 
+# Instance profile for Packer builder instances
 resource "aws_iam_instance_profile" "packer" {
   name = "packer"
   role = aws_iam_role.packer.name

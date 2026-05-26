@@ -1,3 +1,4 @@
+# Main VPC for the portfolio stack
 resource "aws_vpc" "aws_vpc" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = true
@@ -8,6 +9,7 @@ resource "aws_vpc" "aws_vpc" {
   }
 }
 
+# Internet gateway for public subnet egress
 resource "aws_internet_gateway" "aws_internet_gateway" {
   vpc_id = aws_vpc.aws_vpc.id
 
@@ -16,6 +18,7 @@ resource "aws_internet_gateway" "aws_internet_gateway" {
   }
 }
 
+# Public subnets in two AZs (required by the ALB)
 resource "aws_subnet" "public" {
   count = length(local.azs)
 
@@ -29,6 +32,7 @@ resource "aws_subnet" "public" {
   }
 }
 
+# Route table sending public subnet traffic to the IGW
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.aws_vpc.id
 
@@ -42,6 +46,7 @@ resource "aws_route_table" "public" {
   }
 }
 
+# Associate each public subnet with the public route table
 resource "aws_route_table_association" "public" {
   count = length(aws_subnet.public)
 

@@ -1,3 +1,4 @@
+# Launch template for ASG instances (Packer AMI + user data)
 resource "aws_launch_template" "portfolio" {
   name_prefix   = "${var.project_name}-lt-"
   image_id      = data.aws_ami.my_ami.id
@@ -29,6 +30,7 @@ resource "aws_launch_template" "portfolio" {
   }
 }
 
+# Auto Scaling Group registered with the ALB target group
 resource "aws_autoscaling_group" "portfolio" {
   name                      = "${var.project_name}-asg"
   vpc_zone_identifier       = aws_subnet.public[*].id
