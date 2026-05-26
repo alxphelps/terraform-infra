@@ -19,13 +19,12 @@
     {
       "Effect": "Allow",
       "Action": ["ec2:*", "autoscaling:*", "elasticloadbalancing:*", "acm:*"],
-      "Resource": "*",
-      "Condition": { "StringEquals": { "aws:RequestedRegion": "us-east-1" } }
+      "Resource": "*"
     },
     {
       "Effect": "Allow",
       "Action": "route53:*",
-      "Resource": ["arn:aws:route53:::hostedzone/*", "arn:aws:route53:::change/*"]
+      "Resource": "*"
     },
     {
       "Effect": "Allow",
