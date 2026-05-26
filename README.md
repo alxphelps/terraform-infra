@@ -111,6 +111,8 @@ Configure these **repository secrets** (Settings → Secrets and variables → A
 
 Workflows set `aws-region` to `us-east-1` (same as the state backend and default `aws_region`).
 
+For the IAM permissions those keys need, see **`iam/terraform-ci-deploy-policy.json`** and **`iam/README.md`**.
+
 ## Packer
 
 Build AMIs with instance profile **`packer`**. That role can list and read objects in the `342989859526.tfstate` bucket (including Terraform state and the app artifact path used by user data). Name built AMIs so they match `docker-compose-ami-*` for the ASG launch template lookup.
