@@ -24,7 +24,9 @@ provider "aws" {
 
   default_tags {
     tags = {
-      Project = var.project_name
+      Project = var.project_name,
+      Github = var.github_url,
+      Environment = var.environment
     }
   }
 }

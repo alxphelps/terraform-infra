@@ -80,3 +80,13 @@ variable "health_check_path" {
   description = "HTTPS path on the instance for ALB health checks."
   default     = "/health"
 }
+
+variable "github_url" {
+  type        = string
+  description = "GitHub repository URL for the infrastructure source code."
+}
+
+variable "environment" {
+  type        = string
+  description = "Environment name (e.g. dev, staging, prod) for tagging."
+}
