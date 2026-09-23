@@ -22,12 +22,7 @@ jobs:
         run: |
           set -uo pipefail
 
-          endpoint="$ENDPOINT"
-          if [[ ! "$endpoint" =~ ^[A-Za-z0-9.-]+$ ]]; then
-            echo "Invalid endpoint hostname: $endpoint"
-            exit 1
-          fi
-          export endpoint
+          export endpoint="$ENDPOINT"
 
           report="endpoint-test-results.txt"
           : > "$report"
