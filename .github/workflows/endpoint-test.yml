@@ -1,13 +1,9 @@
 name: Endpoint Test
 
 on:
-  workflow_dispatch:
-    inputs:
-      endpoint:
-        description: Hostname to test, for example google.com
-        required: false
-        default: google.com
-        type: string
+  push:
+    paths:
+      - tests/urls
 
 jobs:
   endpoint-test:
@@ -15,73 +11,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Test HTTPS, HTTP redirect, and TLS certificate
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run endpoint tests
         shell: bash
-        env:
-          ENDPOINT: ${{ inputs.endpoint || 'google.com' }}
         run: |
-          set -uo pipefail
-
-          export endpoint="$ENDPOINT"
-
-          report="endpoint-test-results.txt"
-          : > "$report"
-          failed=0
-
-          echo "Endpoint: $endpoint" >> "$report"
-          echo >> "$report"
-
-          run_test() {
-            local name="$1"
-            shift
-            {
-              echo "=== $name ==="
-              if "$@"; then
-                echo "Result: PASS"
-              else
-                echo "Result: FAIL"
-                failed=1
-              fi
-              echo
-            } >> "$report" 2>&1
-          }
-
-          run_test "HTTPS endpoint" \
-            curl --fail --silent --show-error --location \
-              --tlsv1.2 --proto '=https' \
-              --write-out $'HTTP status: %{http_code}\nFinal URL: %{url_effective}\nCertificate verification result: %{ssl_verify_result}\n' \
-              --output /dev/null "https://$endpoint"
-
-          run_test "HTTP endpoint" \
-            curl --fail --silent --show-error \
-              --write-out $'HTTP status: %{http_code}\nFinal URL: %{url_effective}\n' \
-              --output /dev/null "http://$endpoint"
-
-          run_test "TLS certificate validation" bash -c '
-            openssl_output=$(mktemp)
-            if openssl s_client -connect "$endpoint:443" \
-              -servername "$endpoint" \
-              -verify_hostname "$endpoint" \
-              -verify_return_error < /dev/null > "$openssl_output" 2>&1; then
-              cat "$openssl_output"
-              grep -q "Verify return code: 0 (ok)" "$openssl_output"
-            else
-              cat "$openssl_output"
-              rm -f "$openssl_output"
-              exit 1
-            fi
-            rm -f "$openssl_output"
-          '
-
-          echo "=== Overall result ===" >> "$report"
-          if [[ "$failed" -eq 0 ]]; then
-            echo "PASS: All endpoint and certificate checks passed." >> "$report"
-          else
-            echo "FAIL: One or more endpoint and certificate checks failed." >> "$report"
-          fi
-
-          cat "$report"
-          exit "$failed"
+          set -o pipefail
+          python3 tests/endpoint_test.py | tee endpoint-test-results.txt
 
       - name: Upload endpoint test results
         if: always()
