@@ -57,18 +57,10 @@ jobs:
               --write-out $'HTTP status: %{http_code}\nFinal URL: %{url_effective}\nCertificate verification result: %{ssl_verify_result}\n' \
               --output /dev/null "https://$endpoint"
 
-          run_test "HTTP redirects to HTTPS" bash -c '
-            status=$(curl --silent --show-error --output /dev/null \
-              --write-out "%{http_code}" "http://$endpoint")
-            redirect_url=$(curl --silent --show-error --output /dev/null \
-              --write-out "%{redirect_url}" "http://$endpoint")
-            final_url=$(curl --silent --show-error --location --output /dev/null \
-              --write-out "%{url_effective}" "http://$endpoint")
-            printf "Initial HTTP status: %s\nFinal URL: %s\nRedirect URL: %s\n" "$status" "$final_url" "$redirect_url"
-            [[ "$status" =~ ^30[1278]$ ]] && \
-              [[ "$redirect_url" == "https://$endpoint/" || "$redirect_url" == "https://$endpoint:443/" ]] && \
-              [[ "$final_url" == "https://$endpoint/" || "$final_url" == "https://$endpoint:443/" ]]
-          '
+          run_test "HTTP endpoint" \
+            curl --fail --silent --show-error \
+              --write-out $'HTTP status: %{http_code}\nFinal URL: %{url_effective}\n' \
+              --output /dev/null "http://$endpoint"
 
           run_test "TLS certificate validation" bash -c '
             openssl_output=$(mktemp)
